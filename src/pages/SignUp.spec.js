@@ -105,5 +105,34 @@ describe('SignUp page', () => {
 
       expect(button).not.toBeDisabled();
     });
+
+    it('sends username, email and password to backend after clicking submit button', async () => {
+      render(SignUpPage);
+
+      const password = screen.queryByPlaceholderText('password');
+      const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
+      const username = screen.queryByPlaceholderText('username');
+      const email = screen.queryByPlaceholderText('e-mail');
+      const button = screen.queryByRole('button', { name: 'Submit' });
+
+      await userEvent.type(email, 'user1@mail.com');
+      await userEvent.type(username, 'user1');
+      const userPass = '123Zasdsd2@';
+      await userEvent.type(password, userPass);
+      await userEvent.type(confirmPassword, userPass);
+
+      const mockFn = jest.fn();
+      axios.post = mockFn;
+
+      await userEvent.click(button, userPass);
+      const firstcall = mockFn.mock.calls[0];
+      const body = firstcall[1];
+
+      expect(body).toEqual({
+        email: 'user1@mail.com',
+        username: 'user1',
+        password: '123Zasdsd2@',
+      });
+    });
   });
 });
