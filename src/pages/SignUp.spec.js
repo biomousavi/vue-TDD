@@ -1,8 +1,10 @@
 /// type="@testing-library/jest-dom"
+import axios from 'axios';
 import { render, screen } from '@testing-library/vue';
-import { it, expect, describe } from '@jest/globals';
-import '@testing-library/jest-dom/jest-globals';
+import { it, expect, describe, test } from '@jest/globals';
+import '@testing-library/jest-dom';
 import SignUpPage from './SignUp.vue';
+import userEvent from '@testing-library/user-event';
 
 describe('SignUp page', () => {
   describe('Layout', () => {
@@ -75,11 +77,33 @@ describe('SignUp page', () => {
       expect(input.type).toBe('password');
     });
 
+    it('Has submit button', () => {
+      render(SignUpPage);
+      const button = screen.queryByRole('button', { name: 'Submit' });
+
+      expect(button).toBeInTheDocument();
+    });
+
     it('Submit button is disabled', () => {
       render(SignUpPage);
       const button = screen.queryByRole('button', { name: 'Submit' });
 
       expect(button).toBeDisabled();
+    });
+  });
+
+  describe('Interaction', () => {
+    test('submit button is enable when password and confirm password are same', async () => {
+      render(SignUpPage);
+      const password = screen.queryByPlaceholderText('password');
+      const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
+      const button = screen.queryByRole('button', { name: 'Submit' });
+
+      const userPass = '123Zasdsd2@';
+      await userEvent.type(password, userPass);
+      await userEvent.type(confirmPassword, userPass);
+
+      expect(button).not.toBeDisabled();
     });
   });
 });
