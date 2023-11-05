@@ -1,10 +1,12 @@
-/// type="@testing-library/jest-dom"
-import axios from 'axios';
 import { render, screen } from '@testing-library/vue';
 import { it, expect, describe, test } from '@jest/globals';
 import '@testing-library/jest-dom';
 import SignUpPage from './SignUp.vue';
 import userEvent from '@testing-library/user-event';
+import { TextEncoder } from 'util';
+global.TextEncoder = TextEncoder;
+import { setupServer } from 'msw/node';
+import { rest } from 'msw';
 
 describe('SignUp page', () => {
   describe('Layout', () => {
@@ -107,6 +109,16 @@ describe('SignUp page', () => {
     });
 
     it('sends username, email and password to backend after clicking submit button', async () => {
+      let reqBody;
+      const server = setupServer(
+        rest.post('/api/1.0/users', (req, res, ctx) => {
+          reqBody = req.body;
+          return res(ctx.status(200));
+        }),
+      );
+
+      server.listen();
+
       render(SignUpPage);
 
       const password = screen.queryByPlaceholderText('password');
@@ -120,15 +132,11 @@ describe('SignUp page', () => {
       const userPass = '123Zasdsd2@';
       await userEvent.type(password, userPass);
       await userEvent.type(confirmPassword, userPass);
-
-      const mockFn = jest.fn();
-      axios.post = mockFn;
-
       await userEvent.click(button, userPass);
-      const firstcall = mockFn.mock.calls[0];
-      const body = firstcall[1];
 
-      expect(body).toEqual({
+      await server.close();
+
+      expect(reqBody).toEqual({
         email: 'user1@mail.com',
         username: 'user1',
         password: '123Zasdsd2@',
