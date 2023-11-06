@@ -2,6 +2,8 @@
 import axios from 'axios';
 import { ref, computed } from 'vue';
 
+const loading = ref(false);
+const success = ref(false);
 const buttonDisable = ref(false);
 const email = ref('');
 const username = ref('');
@@ -16,13 +18,22 @@ const buttonIsDisabled = computed(() => {
   }
 });
 
-function submitForm() {
+async function submitForm() {
   buttonDisable.value = true;
-  axios.post('/api/1.0/users', {
-    username: username.value,
-    password: password.value,
-    email: email.value,
-  });
+
+  try {
+    loading.value = true;
+    await axios.post('/api/1.0/users', {
+      username: username.value,
+      password: password.value,
+      email: email.value,
+    });
+    success.value = true;
+  } catch (error) {
+    console.log(error);
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 
@@ -54,10 +65,12 @@ function submitForm() {
 
         <div class="text-center">
           <button class="btn btn-primary mt-3" :disabled="buttonIsDisabled" @click.prevent="submitForm">
-            <span class="spinner-border spinner-border-sm" role="status"></span>
+            <span v-if="loading" class="spinner-border spinner-border-sm" role="status"></span>
             Submit
           </button>
         </div>
+
+        <div v-if="success" class="alert alert-success">Please check your email to activate your account</div>
       </div>
     </form>
   </div>
