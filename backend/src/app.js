@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const morgan = require('morgan')
 const UserRouter = require('./user/UserRouter');
 const AuthenticationRouter = require('./auth/AuthenticationRouter');
 const i18next = require('i18next');
@@ -37,7 +38,12 @@ i18next
 FileService.createFolders();
 
 const app = express();
+
+
+
 app.use(cors());
+
+app.use(morgan('short'))
 
 app.use(middleware.handle(i18next));
 
@@ -48,6 +54,8 @@ app.use('/images', express.static(profileFolder, { maxAge: ONE_YEAR_IN_MILLIS })
 app.use('/attachments', express.static(attachmentFolder, { maxAge: ONE_YEAR_IN_MILLIS }));
 
 app.use(tokenAuthentication);
+
+
 
 app.use(UserRouter);
 app.use(AuthenticationRouter);

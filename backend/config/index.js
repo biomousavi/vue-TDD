@@ -1,7 +1,7 @@
-const devStored = require('./devStored');
+const production = require('./production');
 const development = require('./development');
 
 module.exports = {
-  devStored,
+  production,
   development,
 };

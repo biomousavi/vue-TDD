@@ -95,6 +95,21 @@ describe('SignUp page', () => {
   });
 
   describe('Interaction', () => {
+    async function fillTheForm() {
+      render(SignUpPage);
+
+      const password = screen.queryByPlaceholderText('password');
+      const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
+      const username = screen.queryByPlaceholderText('username');
+      const email = screen.queryByPlaceholderText('e-mail');
+
+      await userEvent.type(email, 'user1@mail.com');
+      await userEvent.type(username, 'user1');
+      const userPass = '123Zasdsd2@';
+      await userEvent.type(password, userPass);
+      await userEvent.type(confirmPassword, userPass);
+    }
+
     test('submit button is enable when password and confirm password are same', async () => {
       render(SignUpPage);
       const password = screen.queryByPlaceholderText('password');
@@ -118,21 +133,9 @@ describe('SignUp page', () => {
       );
 
       server.listen();
-
-      render(SignUpPage);
-
-      const password = screen.queryByPlaceholderText('password');
-      const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
-      const username = screen.queryByPlaceholderText('username');
-      const email = screen.queryByPlaceholderText('e-mail');
+      await fillTheForm();
       const button = screen.queryByRole('button', { name: 'Submit' });
-
-      await userEvent.type(email, 'user1@mail.com');
-      await userEvent.type(username, 'user1');
-      const userPass = '123Zasdsd2@';
-      await userEvent.type(password, userPass);
-      await userEvent.type(confirmPassword, userPass);
-      await userEvent.click(button, userPass);
+      await userEvent.click(button);
 
       await server.close();
 
@@ -141,6 +144,55 @@ describe('SignUp page', () => {
         username: 'user1',
         password: '123Zasdsd2@',
       });
+    });
+
+    it('does not allow clicking to the button when there is an ongoing api call', async () => {
+      let coutner = 0;
+      const server = setupServer(
+        rest.post('/api/1.0/users', (req, res, ctx) => {
+          coutner = coutner + 1;
+          return res(ctx.status(200));
+        }),
+      );
+
+      server.listen();
+      await fillTheForm();
+      const button = screen.queryByRole('button', { name: 'Submit' });
+      await userEvent.click(button);
+      await userEvent.click(button);
+
+      await server.close();
+
+      expect(coutner).toBe(1);
+    });
+
+    it('displays spinner while api request is waiting', async () => {
+      const server = setupServer(
+        rest.post('/api/1.0/users', (req, res, ctx) => {
+          return res(ctx.status(200));
+        }),
+      );
+
+      server.listen();
+      await fillTheForm();
+      const button = screen.queryByRole('button', { name: 'Submit' });
+      await userEvent.click(button);
+
+      const spinner = screen.queryByRole('status');
+
+      server.close();
+
+      expect(spinner).toBeInTheDocument();
+    });
+
+    it('does not displays spinner while ther is no api request is waiting', async () => {
+      await fillTheForm();
+      const button = screen.queryByRole('button', { name: 'Submit' });
+      await userEvent.click(button);
+
+      const spinner = screen.queryByRole('status');
+
+      expect(spinner).not.toBeInTheDocument();
     });
   });
 });

@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start-mem": "cross-env NODE_ENV=development npm run migrate && cross-env NODE_ENV=development nodemon index",
-    "start-stored": "cross-env NODE_ENV=devStored npm run migrate && cross-env NODE_ENV=devStored nodemon index",
+    "start-stored": "cross-env NODE_ENV=production npm run migrate && cross-env NODE_ENV=production nodemon index",
     "migrate": "sequelize-cli db:migrate"
   },
   "author": "Basar Buyukkahraman",
@@ -20,6 +20,7 @@
     "i18next": "^19.6.3",
     "i18next-fs-backend": "^1.0.7",
     "i18next-http-middleware": "^3.0.2",
+    "morgan": "^1.10.0",
     "multer": "^1.4.2",
     "nodemailer": "^6.4.11",
     "sequelize": "^6.3.4",
