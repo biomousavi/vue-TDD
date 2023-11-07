@@ -1,10 +1,8 @@
-import { render, screen } from '@testing-library/vue';
 import { it, expect, describe, test } from '@jest/globals';
 import '@testing-library/jest-dom';
+import { render, screen, waitFor } from '@testing-library/vue';
 import SignUpPage from './SignUp.vue';
 import userEvent from '@testing-library/user-event';
-import { TextEncoder } from 'util';
-global.TextEncoder = TextEncoder;
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 
@@ -192,7 +190,7 @@ describe('SignUp page', () => {
       expect(spinner).not.toBeInTheDocument();
     });
 
-    it('shows account activation information after successful signin', async () => {
+    it('shows account activation information after successful signup', async () => {
       const server = setupServer(
         rest.post('/api/1.0/users', (req, res, ctx) => {
           return res(ctx.status(200));
@@ -211,7 +209,7 @@ describe('SignUp page', () => {
       expect(activationMessage).toBeInTheDocument();
     });
 
-    it('does not show account activation information after successful signin', async () => {
+    it('does not show account activation information after successful signup', async () => {
       await fillTheForm();
 
       const activationMessage = screen.queryByText('Please check your email to activate your account');
@@ -219,7 +217,7 @@ describe('SignUp page', () => {
       expect(activationMessage).not.toBeInTheDocument();
     });
 
-    it('does not show account activation information after failing signin', async () => {
+    it('does not show account activation information after failing signup', async () => {
       const server = setupServer(
         rest.post('/api/1.0/users', (req, res, ctx) => {
           return res(ctx.status(400));
@@ -233,9 +231,32 @@ describe('SignUp page', () => {
 
       server.close();
 
-      const activationMessage = screen.findByText('Please check your email to activate your account');
+      await expect(async () => {
+        await screen.findByText('Please check your email to activate your account');
+      }).rejects.toThrowError();
+    });
 
-      expect(activationMessage).rejects.toThrowError();
+    it('hides signup form after successful signup', async () => {
+      const server = setupServer(
+        rest.post('/api/1.0/users', (req, res, ctx) => {
+          return res(ctx.status(200));
+        }),
+      );
+
+      server.listen();
+      await fillTheForm();
+      const button = screen.queryByRole('button', { name: 'Submit' });
+      // before clicking submit
+
+      const form = screen.queryByTestId('signup-form');
+
+      await userEvent.click(button);
+
+      server.close();
+
+      await waitFor(() => {
+        expect(form).not.toBeVisible();
+      });
     });
   });
 });

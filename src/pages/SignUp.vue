@@ -39,7 +39,7 @@ async function submitForm() {
 
 <template>
   <div class="row justify-content-center">
-    <form class="card mt-5 col-md-4">
+    <form v-if="!success" class="card mt-5 col-md-4" data-testid="signup-form">
       <div class="card-header">
         <h1 class="text-center">SignUp page</h1>
       </div>
@@ -69,9 +69,8 @@ async function submitForm() {
             Submit
           </button>
         </div>
-
-        <div v-if="success" class="alert alert-success">Please check your email to activate your account</div>
       </div>
     </form>
+    <div v-if="success" class="alert alert-success">Please check your email to activate your account</div>
   </div>
 </template>
