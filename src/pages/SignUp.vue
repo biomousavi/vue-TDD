@@ -30,7 +30,7 @@ async function submitForm() {
     });
     success.value = true;
   } catch (error) {
-    console.log(error);
+    // console.log(error);
   } finally {
     loading.value = false;
   }

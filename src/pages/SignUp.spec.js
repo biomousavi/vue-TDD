@@ -218,5 +218,24 @@ describe('SignUp page', () => {
 
       expect(activationMessage).not.toBeInTheDocument();
     });
+
+    it('does not show account activation information after failing signin', async () => {
+      const server = setupServer(
+        rest.post('/api/1.0/users', (req, res, ctx) => {
+          return res(ctx.status(400));
+        }),
+      );
+
+      server.listen();
+      await fillTheForm();
+      const button = screen.queryByRole('button', { name: 'Submit' });
+      await userEvent.click(button);
+
+      server.close();
+
+      const activationMessage = screen.findByText('Please check your email to activate your account');
+
+      expect(activationMessage).rejects.toThrowError();
+    });
   });
 });
