@@ -258,5 +258,29 @@ describe('SignUp page', () => {
         expect(form).not.toBeVisible();
       });
     });
+
+    it('returns validation error message for  username', async () => {
+      const message = 'Username cannot be null';
+
+      const server = setupServer(
+        rest.post('/api/1.0/users', (req, res, ctx) => {
+          return res(
+            ctx.status(400),
+            ctx.json({
+              validationErrors: { username: message },
+            }),
+          );
+        }),
+      );
+
+      server.listen();
+      await fillTheForm();
+      const button = screen.queryByRole('button', { name: 'Submit' });
+      await userEvent.click(button);
+      server.close();
+
+      const text = await screen.findByText(message);
+      expect(text).toBeInTheDocument();
+    });
   });
 });

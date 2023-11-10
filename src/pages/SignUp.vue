@@ -9,6 +9,7 @@ const email = ref('');
 const username = ref('');
 const password = ref('');
 const confirmPassword = ref('');
+const errors = ref({});
 
 const buttonIsDisabled = computed(() => {
   if (password.value && confirmPassword.value && !buttonDisable.value) {
@@ -30,7 +31,9 @@ async function submitForm() {
     });
     success.value = true;
   } catch (error) {
-    // console.log(error);
+    if (error.response?.data?.validationErrors) {
+      errors.value = error.response?.data?.validationErrors;
+    }
   } finally {
     loading.value = false;
   }
@@ -45,23 +48,38 @@ async function submitForm() {
       </div>
 
       <div class="card-body">
-        <label class="form-label" for="username">Username</label>
-        <input id="username" v-model="username" class="form-control" placeholder="username" />
+        <div class="mb-3">
+          <label class="form-label" for="username">Username</label>
+          <input id="username" v-model="username" class="form-control" placeholder="username" />
+          <span>{{ errors.username }}</span>
+        </div>
 
-        <label class="form-label" for="e-mail">E-mail</label>
-        <input id="e-mail" v-model="email" class="form-control" placeholder="e-mail" />
+        <div class="mb-3">
+          <label class="form-label" for="e-mail">E-mail</label>
+          <input id="e-mail" v-model="email" class="form-control" placeholder="e-mail" />
+        </div>
 
-        <label class="form-label" for="password">Password</label>
-        <input id="password" v-model="password" class="form-control" placeholder="password" type="password" />
+        <div class="mb-3">
+          <label class="form-label" for="password">Password</label>
+          <input
+            id="password"
+            v-model="password"
+            class="form-control"
+            placeholder="password"
+            type="password"
+          />
+        </div>
 
-        <label class="form-label" for="confirm-password">Confirm Password</label>
-        <input
-          id="confirm-password"
-          v-model="confirmPassword"
-          class="form-control"
-          placeholder="Confirm Password"
-          type="password"
-        />
+        <div class="mb-3">
+          <label class="form-label" for="confirm-password">Confirm Password</label>
+          <input
+            id="confirm-password"
+            v-model="confirmPassword"
+            class="form-control"
+            placeholder="Confirm Password"
+            type="password"
+          />
+        </div>
 
         <div class="text-center">
           <button class="btn btn-primary mt-3" :disabled="buttonIsDisabled" @click.prevent="submitForm">
