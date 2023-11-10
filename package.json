@@ -24,6 +24,7 @@
     "@vitejs/plugin-vue": "^4.2.3",
     "@vue/vue3-jest": "^28.1.0",
     "babel-jest": "^29.7.0",
+    "core-js": "^3.33.2",
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",

@@ -1,4 +1,5 @@
 import { it, expect, describe, test } from '@jest/globals';
+import 'core-js';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/vue';
 import SignUpPage from './SignUp.vue';
@@ -107,6 +108,12 @@ describe('SignUp page', () => {
       await userEvent.type(password, userPass);
       await userEvent.type(confirmPassword, userPass);
     }
+
+    const server = setupServer();
+
+    beforeAll(() => server.listen());
+    afterAll(() => server.close());
+    beforeEach(() => server.resetHandlers());
 
     test('submit button is enable when password and confirm password are same', async () => {
       render(SignUpPage);
@@ -218,18 +225,15 @@ describe('SignUp page', () => {
     });
 
     it('does not show account activation information after failing signup', async () => {
-      const server = setupServer(
+      server.use(
         rest.post('/api/1.0/users', (req, res, ctx) => {
           return res(ctx.status(400));
         }),
       );
 
-      server.listen();
       await fillTheForm();
       const button = screen.queryByRole('button', { name: 'Submit' });
       await userEvent.click(button);
-
-      server.close();
 
       await expect(async () => {
         await screen.findByText('Please check your email to activate your account');
@@ -261,8 +265,7 @@ describe('SignUp page', () => {
 
     it('returns validation error message for  username', async () => {
       const message = 'Username cannot be null';
-
-      const server = setupServer(
+      server.use(
         rest.post('/api/1.0/users', (req, res, ctx) => {
           return res(
             ctx.status(400),
@@ -272,13 +275,9 @@ describe('SignUp page', () => {
           );
         }),
       );
-
-      server.listen();
       await fillTheForm();
       const button = screen.queryByRole('button', { name: 'Submit' });
       await userEvent.click(button);
-      server.close();
-
       const text = await screen.findByText(message);
       expect(text).toBeInTheDocument();
     });
