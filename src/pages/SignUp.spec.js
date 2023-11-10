@@ -187,7 +187,6 @@ describe('SignUp page', () => {
     it('does not displays spinner while ther is no api request is waiting', async () => {
       await fillTheForm();
       const spinner = screen.queryByRole('status');
-
       expect(spinner).not.toBeInTheDocument();
     });
 
@@ -226,9 +225,10 @@ describe('SignUp page', () => {
       const button = screen.queryByRole('button', { name: 'Submit' });
       await userEvent.click(button);
 
-      await expect(async () => {
-        await screen.findByText('Please check your email to activate your account');
-      }).rejects.toThrowError();
+      await waitFor(() => {
+        const text = screen.queryByText('Please check your email to activate your account');
+        expect(text).not.toBeInTheDocument();
+      });
     });
 
     it('hides signup form after successful signup', async () => {
@@ -266,6 +266,39 @@ describe('SignUp page', () => {
       await userEvent.click(button);
       const text = await screen.findByText(message);
       expect(text).toBeInTheDocument();
+    });
+
+    it('hides spinner after error received', async () => {
+      server.use(
+        rest.post('/api/1.0/users', (req, res, ctx) => {
+          return res(ctx.status(400));
+        }),
+      );
+      await fillTheForm();
+      const button = screen.queryByRole('button', { name: 'Submit' });
+      await userEvent.click(button);
+
+      await waitFor(() => {
+        const spinner = screen.queryByRole('status');
+        expect(spinner).not.toBeInTheDocument();
+      });
+    });
+
+    it('enables the button after error', async () => {
+      server.use(
+        rest.post('/api/1.0/users', (req, res, ctx) => {
+          return res(ctx.status(400));
+        }),
+      );
+      await fillTheForm();
+      const button = screen.queryByRole('button', { name: 'Submit' });
+      await userEvent.click(button);
+
+      await waitFor(async () => {
+        const button = screen.queryByRole('button', { name: 'Submit' });
+
+        expect(button).toBeEnabled();
+      });
     });
   });
 });

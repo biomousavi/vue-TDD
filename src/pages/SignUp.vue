@@ -4,7 +4,6 @@ import { ref, computed } from 'vue';
 
 const loading = ref(false);
 const success = ref(false);
-const buttonDisable = ref(false);
 const email = ref('');
 const username = ref('');
 const password = ref('');
@@ -12,7 +11,7 @@ const confirmPassword = ref('');
 const errors = ref({});
 
 const buttonIsDisabled = computed(() => {
-  if (password.value && confirmPassword.value && !buttonDisable.value) {
+  if (password.value && confirmPassword.value && !loading.value) {
     return password.value !== confirmPassword.value;
   } else {
     return true;
@@ -20,8 +19,6 @@ const buttonIsDisabled = computed(() => {
 });
 
 async function submitForm() {
-  buttonDisable.value = true;
-
   try {
     loading.value = true;
     await axios.post('/api/1.0/users', {
@@ -36,7 +33,6 @@ async function submitForm() {
     }
   } finally {
     loading.value = false;
-    // buttonDisable.value = false;
   }
 }
 </script>
