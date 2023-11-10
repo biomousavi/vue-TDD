@@ -19,7 +19,7 @@ describe('SignUp page', () => {
     it('has username input', () => {
       render(SignUpPage);
 
-      const input = screen.queryByPlaceholderText('username');
+      const input = screen.queryByPlaceholderText('Username');
       expect(input).toBeInTheDocument();
     });
 
@@ -32,7 +32,7 @@ describe('SignUp page', () => {
 
     it('has email input', () => {
       render(SignUpPage);
-      const input = screen.queryByPlaceholderText('e-mail');
+      const input = screen.queryByPlaceholderText('E-mail');
       expect(input).toBeInTheDocument();
     });
 
@@ -44,7 +44,7 @@ describe('SignUp page', () => {
 
     it('has password input', () => {
       render(SignUpPage);
-      const input = screen.queryByPlaceholderText('password');
+      const input = screen.queryByPlaceholderText('Password');
       expect(input).toBeInTheDocument();
     });
 
@@ -97,10 +97,10 @@ describe('SignUp page', () => {
     async function fillTheForm() {
       render(SignUpPage);
 
-      const password = screen.queryByPlaceholderText('password');
+      const password = screen.queryByPlaceholderText('Password');
       const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
-      const username = screen.queryByPlaceholderText('username');
-      const email = screen.queryByPlaceholderText('e-mail');
+      const username = screen.queryByPlaceholderText('Username');
+      const email = screen.queryByPlaceholderText('E-mail');
 
       await userEvent.type(email, 'user1@mail.com');
       await userEvent.type(username, 'user1');
@@ -117,7 +117,7 @@ describe('SignUp page', () => {
 
     test('submit button is enable when password and confirm password are same', async () => {
       render(SignUpPage);
-      const password = screen.queryByPlaceholderText('password');
+      const password = screen.queryByPlaceholderText('Password');
       const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
       const button = screen.queryByRole('button', { name: 'Submit' });
 

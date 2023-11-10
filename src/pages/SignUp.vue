@@ -1,6 +1,7 @@
 <script setup>
 import axios from 'axios';
 import { ref, computed } from 'vue';
+import Input from '../components/Input.vue';
 
 const loading = ref(false);
 const success = ref(false);
@@ -45,38 +46,16 @@ async function submitForm() {
       </div>
 
       <div class="card-body">
-        <div class="mb-3">
-          <label class="form-label" for="username">Username</label>
-          <input id="username" v-model="username" class="form-control" placeholder="username" />
-          <span>{{ errors.username }}</span>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label" for="e-mail">E-mail</label>
-          <input id="e-mail" v-model="email" class="form-control" placeholder="e-mail" />
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label" for="password">Password</label>
-          <input
-            id="password"
-            v-model="password"
-            class="form-control"
-            placeholder="password"
-            type="password"
-          />
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label" for="confirm-password">Confirm Password</label>
-          <input
-            id="confirm-password"
-            v-model="confirmPassword"
-            class="form-control"
-            placeholder="Confirm Password"
-            type="password"
-          />
-        </div>
+        <Input id="username" v-model="username" label="Username" :error="errors.username" />
+        <Input id="email" v-model="email" label="E-mail" :error="errors.email" />
+        <Input id="password" v-model="password" label="Password" :error="errors.password" type="password" />
+        <Input
+          id="confirm-password"
+          v-model="confirmPassword"
+          label="Confirm Password"
+          :error="errors.password"
+          type="password"
+        />
 
         <div class="text-center">
           <button class="btn btn-primary mt-3" :disabled="buttonIsDisabled" @click.prevent="submitForm">
