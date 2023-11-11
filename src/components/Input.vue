@@ -10,7 +10,7 @@ defineProps({
   modelValue: {
     type: String,
     default: '',
-    required: true,
+    required: false,
   },
 });
 </script>
@@ -21,11 +21,12 @@ defineProps({
     <input
       :id="id"
       class="form-control"
+      :class="{ 'is-invalid': error }"
       :placeholder="label"
       :value="modelValue"
       :type="type"
       @input="$emit('update:modelValue', $event.target.value)"
     />
-    <span>{{ error }}</span>
+    <span class="invalid-feedback">{{ error }}</span>
   </div>
 </template>

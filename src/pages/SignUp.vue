@@ -40,7 +40,7 @@ async function submitForm() {
 
 <template>
   <div class="row justify-content-center">
-    <form v-if="!success" class="card mt-5 col-md-4" data-testid="signup-form">
+    <form v-if="!success" class="card px-0 mt-5 col-md-4" data-testid="signup-form">
       <div class="card-header">
         <h1 class="text-center">SignUp page</h1>
       </div>
