@@ -282,48 +282,25 @@ describe('SignUp page', () => {
       });
     });
 
-    it('returns validation error message for  username', async () => {
-      const message = 'Username cannot be null';
+    it.each`
+      field         | message
+      ${'username'} | ${'Username cannot be null'}
+      ${'password'} | ${'Password cannot be null'}
+      ${'email'}    | ${'E-mail cannot be null'}
+    `('returns validation error message for $field field', async (params) => {
+      const message = params.message;
+      const field = params.field;
+
       server.use(
         rest.post('/api/1.0/users', (req, res, ctx) => {
           return res(
             ctx.status(400),
             ctx.json({
-              validationErrors: { username: message },
+              validationErrors: { [field]: message },
             }),
           );
         }),
       );
-      await fillTheForm();
-      const button = screen.queryByRole('button', { name: 'Submit' });
-      await userEvent.click(button);
-      const text = await screen.findByText(message);
-      expect(text).toBeInTheDocument();
-    });
-
-    it('returns validation error message for  E-mail', async () => {
-      const message = 'E-mail cannot be null';
-      server.use(
-        rest.post('/api/1.0/users', (req, res, ctx) => {
-          return res(ctx.status(400), ctx.json({ validationErrors: { email: message } }));
-        }),
-      );
-
-      await fillTheForm();
-      const button = screen.queryByRole('button', { name: 'Submit' });
-      await userEvent.click(button);
-      const text = await screen.findByText(message);
-      expect(text).toBeInTheDocument();
-    });
-
-    it('returns validation error message for  password', async () => {
-      const message = 'password cannot be null';
-      server.use(
-        rest.post('/api/1.0/users', (req, res, ctx) => {
-          return res(ctx.status(400), ctx.json({ validationErrors: { password: message } }));
-        }),
-      );
-
       await fillTheForm();
       const button = screen.queryByRole('button', { name: 'Submit' });
       await userEvent.click(button);
