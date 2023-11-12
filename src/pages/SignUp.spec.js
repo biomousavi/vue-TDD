@@ -249,25 +249,6 @@ describe('SignUp page', () => {
       });
     });
 
-    it('returns validation error message for  username', async () => {
-      const message = 'Username cannot be null';
-      server.use(
-        rest.post('/api/1.0/users', (req, res, ctx) => {
-          return res(
-            ctx.status(400),
-            ctx.json({
-              validationErrors: { username: message },
-            }),
-          );
-        }),
-      );
-      await fillTheForm();
-      const button = screen.queryByRole('button', { name: 'Submit' });
-      await userEvent.click(button);
-      const text = await screen.findByText(message);
-      expect(text).toBeInTheDocument();
-    });
-
     it('hides spinner after error received', async () => {
       server.use(
         rest.post('/api/1.0/users', (req, res, ctx) => {
@@ -299,6 +280,55 @@ describe('SignUp page', () => {
 
         expect(button).toBeEnabled();
       });
+    });
+
+    it('returns validation error message for  username', async () => {
+      const message = 'Username cannot be null';
+      server.use(
+        rest.post('/api/1.0/users', (req, res, ctx) => {
+          return res(
+            ctx.status(400),
+            ctx.json({
+              validationErrors: { username: message },
+            }),
+          );
+        }),
+      );
+      await fillTheForm();
+      const button = screen.queryByRole('button', { name: 'Submit' });
+      await userEvent.click(button);
+      const text = await screen.findByText(message);
+      expect(text).toBeInTheDocument();
+    });
+
+    it('returns validation error message for  E-mail', async () => {
+      const message = 'E-mail cannot be null';
+      server.use(
+        rest.post('/api/1.0/users', (req, res, ctx) => {
+          return res(ctx.status(400), ctx.json({ validationErrors: { email: message } }));
+        }),
+      );
+
+      await fillTheForm();
+      const button = screen.queryByRole('button', { name: 'Submit' });
+      await userEvent.click(button);
+      const text = await screen.findByText(message);
+      expect(text).toBeInTheDocument();
+    });
+
+    it('returns validation error message for  password', async () => {
+      const message = 'password cannot be null';
+      server.use(
+        rest.post('/api/1.0/users', (req, res, ctx) => {
+          return res(ctx.status(400), ctx.json({ validationErrors: { password: message } }));
+        }),
+      );
+
+      await fillTheForm();
+      const button = screen.queryByRole('button', { name: 'Submit' });
+      await userEvent.click(button);
+      const text = await screen.findByText(message);
+      expect(text).toBeInTheDocument();
     });
   });
 });

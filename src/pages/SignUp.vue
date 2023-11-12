@@ -49,13 +49,7 @@ async function submitForm() {
         <Input id="username" v-model="username" label="Username" :error="errors.username" />
         <Input id="email" v-model="email" label="E-mail" :error="errors.email" />
         <Input id="password" v-model="password" label="Password" :error="errors.password" type="password" />
-        <Input
-          id="confirm-password"
-          v-model="confirmPassword"
-          label="Confirm Password"
-          :error="errors.password"
-          type="password"
-        />
+        <Input id="confirm-password" v-model="confirmPassword" label="Confirm Password" type="password" />
 
         <div class="text-center">
           <button class="btn btn-primary mt-3" :disabled="buttonIsDisabled" @click.prevent="submitForm">
