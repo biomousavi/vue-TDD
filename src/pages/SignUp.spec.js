@@ -94,6 +94,11 @@ describe('SignUp page', () => {
   });
 
   describe('Interaction', () => {
+    async function clickSubmit() {
+      const button = screen.queryByRole('button', { name: 'Submit' });
+      await userEvent.click(button);
+    }
+
     async function fillTheForm() {
       render(SignUpPage);
 
@@ -138,8 +143,7 @@ describe('SignUp page', () => {
       );
 
       await fillTheForm();
-      const button = screen.queryByRole('button', { name: 'Submit' });
-      await userEvent.click(button);
+      await clickSubmit();
 
       expect(reqBody).toEqual({
         email: 'user1@mail.com',
@@ -159,9 +163,7 @@ describe('SignUp page', () => {
 
       server.listen();
       await fillTheForm();
-      const button = screen.queryByRole('button', { name: 'Submit' });
-      await userEvent.click(button);
-      await userEvent.click(button);
+      await clickSubmit();
 
       await server.close();
 
@@ -176,8 +178,7 @@ describe('SignUp page', () => {
       );
 
       await fillTheForm();
-      const button = screen.queryByRole('button', { name: 'Submit' });
-      await userEvent.click(button);
+      await clickSubmit();
 
       const spinner = screen.queryByRole('status');
 
@@ -198,8 +199,7 @@ describe('SignUp page', () => {
       );
 
       await fillTheForm();
-      const button = screen.queryByRole('button', { name: 'Submit' });
-      await userEvent.click(button);
+      await clickSubmit();
 
       const activationMessage = await screen.findByText('Please check your email to activate your account');
 
@@ -222,8 +222,7 @@ describe('SignUp page', () => {
       );
 
       await fillTheForm();
-      const button = screen.queryByRole('button', { name: 'Submit' });
-      await userEvent.click(button);
+      await clickSubmit();
 
       await waitFor(() => {
         const text = screen.queryByText('Please check your email to activate your account');
@@ -256,8 +255,7 @@ describe('SignUp page', () => {
         }),
       );
       await fillTheForm();
-      const button = screen.queryByRole('button', { name: 'Submit' });
-      await userEvent.click(button);
+      await clickSubmit();
 
       await waitFor(() => {
         const spinner = screen.queryByRole('status');
@@ -272,8 +270,7 @@ describe('SignUp page', () => {
         }),
       );
       await fillTheForm();
-      const button = screen.queryByRole('button', { name: 'Submit' });
-      await userEvent.click(button);
+      await clickSubmit();
 
       await waitFor(async () => {
         const button = screen.queryByRole('button', { name: 'Submit' });
@@ -288,8 +285,7 @@ describe('SignUp page', () => {
       ${'password'} | ${'Password cannot be null'}
       ${'email'}    | ${'E-mail cannot be null'}
     `('returns validation error message for $field field', async (params) => {
-      const message = params.message;
-      const field = params.field;
+      const { message, field } = params;
 
       server.use(
         rest.post('/api/1.0/users', (req, res, ctx) => {
@@ -302,10 +298,51 @@ describe('SignUp page', () => {
         }),
       );
       await fillTheForm();
-      const button = screen.queryByRole('button', { name: 'Submit' });
-      await userEvent.click(button);
+      await clickSubmit();
       const text = await screen.findByText(message);
       expect(text).toBeInTheDocument();
+    });
+
+    it('displays mismatch message for password input', async () => {
+      server.use(
+        rest.post('/api/1.0/users', (req, res, ctx) => {
+          return res(ctx.status(400));
+        }),
+      );
+      render(SignUpPage);
+      const password = screen.queryByPlaceholderText('Password');
+      const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
+
+      await userEvent.type(password, '123Zasdsd2@');
+      await userEvent.type(confirmPassword, '3rdfSomeDifferentPass#');
+
+      await clickSubmit();
+
+      const text = await screen.findByText('Password mismatch');
+      expect(text).toBeInTheDocument();
+    });
+
+    fit.each`
+      field         | message                      | label
+      ${'username'} | ${'Username cannot be null'} | ${'Username'}
+      ${'password'} | ${'Password cannot be null'} | ${'Password'}
+      ${'email'}    | ${'E-mail cannot be null'}   | ${'E-mail'}
+    `('clears validation $field field error after input is updated', async ({ field, message, label }) => {
+      server.use(
+        rest.post('/api/1.0/users', (req, res, ctx) => {
+          return res(ctx.status(400), ctx.json({ validationErrors: { [field]: message } }));
+        }),
+      );
+      await fillTheForm();
+      await clickSubmit();
+
+      const input = screen.queryByPlaceholderText(label);
+      await userEvent.type(input, 'updated');
+
+      await waitFor(() => {
+        const errorMessage = screen.queryByText(message);
+        expect(errorMessage).not.toBeInTheDocument();
+      });
     });
   });
 });

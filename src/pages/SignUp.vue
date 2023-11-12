@@ -19,6 +19,8 @@ const buttonIsDisabled = computed(() => {
   }
 });
 
+const passwordMismatch = computed(() => password.value !== confirmPassword.value);
+
 async function submitForm() {
   try {
     loading.value = true;
@@ -46,10 +48,35 @@ async function submitForm() {
       </div>
 
       <div class="card-body">
-        <Input id="username" v-model="username" label="Username" :error="errors.username" />
-        <Input id="email" v-model="email" label="E-mail" :error="errors.email" />
-        <Input id="password" v-model="password" label="Password" :error="errors.password" type="password" />
-        <Input id="confirm-password" v-model="confirmPassword" label="Confirm Password" type="password" />
+        <Input
+          id="username"
+          v-model="username"
+          label="Username"
+          :error="errors.username"
+          @update:model-value="errors.username = ''"
+        />
+        <Input
+          id="email"
+          v-model="email"
+          label="E-mail"
+          :error="errors.email"
+          @update:model-value="errors.email = ''"
+        />
+        <Input
+          id="password"
+          v-model="password"
+          label="Password"
+          :error="errors.password"
+          type="password"
+          @update:model-value="errors.password = ''"
+        />
+        <Input
+          id="confirm-password"
+          v-model="confirmPassword"
+          label="Confirm Password"
+          :error="passwordMismatch ? 'Password mismatch' : ''"
+          type="password"
+        />
 
         <div class="text-center">
           <button class="btn btn-primary mt-3" :disabled="buttonIsDisabled" @click.prevent="submitForm">
