@@ -74,7 +74,7 @@ async function submitForm() {
           id="confirm-password"
           v-model="confirmPassword"
           :label="$t('confirmPassword')"
-          :error="passwordMismatch ? 'Password mismatch' : ''"
+          :error="passwordMismatch ? $t('passwordMismatch') : ''"
           type="password"
         />
 

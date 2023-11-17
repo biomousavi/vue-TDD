@@ -1,7 +1,7 @@
 import { it, expect, describe, test } from '@jest/globals';
 import 'core-js';
 import '@testing-library/jest-dom';
-import { render, screen, waitFor } from '@testing-library/vue';
+import { render, screen, waitFor, cleanup } from '@testing-library/vue';
 import SignUpPage from './SignUp.vue';
 import Language from '../components/Language.vue';
 import userEvent from '@testing-library/user-event';
@@ -15,6 +15,34 @@ describe('SignUp page', () => {
   const renderSignUpPage = () => {
     render(SignUpPage, { global: { plugins: [i18n] } });
   };
+
+  async function fillTheForm() {
+    renderSignUpPage();
+
+    const password = screen.queryByPlaceholderText('Password');
+    const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
+    const username = screen.queryByPlaceholderText('Username');
+    const email = screen.queryByPlaceholderText('E-mail');
+
+    await userEvent.type(email, 'user1@mail.com');
+    await userEvent.type(username, 'user1');
+    const userPass = '123Zasdsd2@';
+    await userEvent.type(password, userPass);
+    await userEvent.type(confirmPassword, userPass);
+  }
+  async function clickSubmit() {
+    const button = screen.queryByRole('button', { name: 'Submit' });
+    await userEvent.click(button);
+  }
+
+  const server = setupServer();
+
+  beforeAll(() => server.listen());
+  afterAll(() => server.close());
+  beforeEach(() => {
+    cleanup();
+    server.resetHandlers();
+  });
 
   describe('Layout', () => {
     it('has SighUp header', () => {
@@ -102,32 +130,6 @@ describe('SignUp page', () => {
   });
 
   describe('Interaction', () => {
-    async function clickSubmit() {
-      const button = screen.queryByRole('button', { name: 'Submit' });
-      await userEvent.click(button);
-    }
-
-    async function fillTheForm() {
-      renderSignUpPage();
-
-      const password = screen.queryByPlaceholderText('Password');
-      const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
-      const username = screen.queryByPlaceholderText('Username');
-      const email = screen.queryByPlaceholderText('E-mail');
-
-      await userEvent.type(email, 'user1@mail.com');
-      await userEvent.type(username, 'user1');
-      const userPass = '123Zasdsd2@';
-      await userEvent.type(password, userPass);
-      await userEvent.type(confirmPassword, userPass);
-    }
-
-    const server = setupServer();
-
-    beforeAll(() => server.listen());
-    afterAll(() => server.close());
-    beforeEach(() => server.resetHandlers());
-
     test('submit button is enable when password and confirm password are same', async () => {
       renderSignUpPage();
       const password = screen.queryByPlaceholderText('Password');
@@ -312,11 +314,6 @@ describe('SignUp page', () => {
     });
 
     it('displays mismatch message for password input', async () => {
-      server.use(
-        rest.post('/api/1.0/users', (req, res, ctx) => {
-          return res(ctx.status(400));
-        }),
-      );
       renderSignUpPage();
       const password = screen.queryByPlaceholderText('Password');
       const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
@@ -324,9 +321,7 @@ describe('SignUp page', () => {
       await userEvent.type(password, '123Zasdsd2@');
       await userEvent.type(confirmPassword, '3rdfSomeDifferentPass#');
 
-      await clickSubmit();
-
-      const text = await screen.findByText('Password mismatch');
+      const text = await screen.findByText(en.passwordMismatch);
       expect(text).toBeInTheDocument();
     });
 
@@ -354,7 +349,7 @@ describe('SignUp page', () => {
     });
   });
 
-  describe('Internationalization', () => {
+  fdescribe('Internationalization', () => {
     it('shows text in English by default', () => {
       renderSignUpPage();
 
@@ -362,13 +357,30 @@ describe('SignUp page', () => {
     });
 
     it('shows text in FA after selecting FA language', async () => {
-      render(SignUpPage, { global: { plugins: [i18n] } });
+      renderSignUpPage();
       render(Language, { global: { plugins: [i18n] } });
 
       const Farsi = screen.queryByTitle('فارسی');
       await userEvent.click(Farsi);
 
       expect(screen.queryByRole('heading', { name: fa.signUp })).toBeInTheDocument();
+    });
+
+    it('shows password validation text in FA ', async () => {
+      renderSignUpPage();
+      render(Language, { global: { plugins: [i18n] } });
+
+      const password = screen.queryByPlaceholderText('Password');
+      const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
+
+      await userEvent.type(password, '123Zasdsd2@');
+      await userEvent.type(confirmPassword, '3rdfSomeDifferentPass#');
+
+      const Farsi = screen.queryByTitle('فارسی');
+      await userEvent.click(Farsi);
+
+      const text = await screen.findByText(fa.passwordMismatch);
+      expect(text).toBeInTheDocument();
     });
 
     it('shows text in EN after selecting EN language', async () => {

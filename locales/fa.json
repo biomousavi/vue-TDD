@@ -3,5 +3,6 @@
   "username": "نام کاربری",
   "email": "ایمیل",
   "password": "گذرواژه",
-  "confirmPassword": "تایید گزرواژه"
+  "confirmPassword": "تایید گزرواژه",
+  "passwordMismatch": "گزرواژه تطابق ندارد"
 }
