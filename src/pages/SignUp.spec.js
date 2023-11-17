@@ -3,10 +3,13 @@ import 'core-js';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/vue';
 import SignUpPage from './SignUp.vue';
+import Language from '../components/Language.vue';
 import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 import i18n from '../../locales/i18n';
+import en from '../../locales/en.json';
+import fa from '../../locales/fa.json';
 
 describe('SignUp page', () => {
   const renderSignUpPage = () => {
@@ -348,6 +351,37 @@ describe('SignUp page', () => {
         const errorMessage = screen.queryByText(message);
         expect(errorMessage).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Internationalization', () => {
+    it('shows text in English by default', () => {
+      renderSignUpPage();
+
+      expect(screen.queryByRole('heading', { name: en.signUp })).toBeInTheDocument();
+    });
+
+    it('shows text in FA after selecting FA language', async () => {
+      render(SignUpPage, { global: { plugins: [i18n] } });
+      render(Language, { global: { plugins: [i18n] } });
+
+      const Farsi = screen.queryByTitle('فارسی');
+      await userEvent.click(Farsi);
+
+      expect(screen.queryByRole('heading', { name: fa.signUp })).toBeInTheDocument();
+    });
+
+    it('shows text in EN after selecting EN language', async () => {
+      render(SignUpPage, { global: { plugins: [i18n] } });
+      render(Language, { global: { plugins: [i18n] } });
+
+      const Farsi = screen.queryByTitle('فارسی');
+      await userEvent.click(Farsi);
+
+      const English = screen.queryByTitle('English');
+      await userEvent.click(English);
+
+      expect(screen.queryByRole('heading', { name: en.signUp })).toBeInTheDocument();
     });
   });
 });
