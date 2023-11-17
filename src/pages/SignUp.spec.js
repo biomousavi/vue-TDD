@@ -6,87 +6,92 @@ import SignUpPage from './SignUp.vue';
 import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import i18n from '../../locales/i18n';
 
 describe('SignUp page', () => {
+  const renderSignUpPage = () => {
+    render(SignUpPage, { global: { plugins: [i18n] } });
+  };
+
   describe('Layout', () => {
     it('has SighUp header', () => {
-      render(SignUpPage);
+      renderSignUpPage();
       const header = screen.queryByRole('heading', { name: 'SignUp page' });
 
       expect(header).not.toBeNull();
     });
 
     it('has username input', () => {
-      render(SignUpPage);
+      renderSignUpPage();
 
       const input = screen.queryByPlaceholderText('Username');
       expect(input).toBeInTheDocument();
     });
 
     it('has username input label', () => {
-      render(SignUpPage);
+      renderSignUpPage();
 
       const input = screen.getByLabelText('Username');
       expect(input).toBeInTheDocument();
     });
 
     it('has email input', () => {
-      render(SignUpPage);
+      renderSignUpPage();
       const input = screen.queryByPlaceholderText('E-mail');
       expect(input).toBeInTheDocument();
     });
 
     it('has email input label', () => {
-      render(SignUpPage);
+      renderSignUpPage();
       const input = screen.getByLabelText('E-mail');
       expect(input).toBeInTheDocument();
     });
 
     it('has password input', () => {
-      render(SignUpPage);
+      renderSignUpPage();
       const input = screen.queryByPlaceholderText('Password');
       expect(input).toBeInTheDocument();
     });
 
     it('has password input label', () => {
-      render(SignUpPage);
+      renderSignUpPage();
       const input = screen.getByLabelText('Password');
       expect(input).toBeInTheDocument();
     });
 
     it('has password type for password input ', () => {
-      render(SignUpPage);
+      renderSignUpPage();
       const input = screen.getByLabelText('Password');
       expect(input.type).toBe('password');
     });
 
     it('has confirm password input', () => {
-      render(SignUpPage);
+      renderSignUpPage();
       const input = screen.queryByPlaceholderText('Confirm Password');
       expect(input).toBeInTheDocument();
     });
 
     it('has confirm password input label', () => {
-      render(SignUpPage);
+      renderSignUpPage();
       const input = screen.getByLabelText('Confirm Password');
       expect(input).toBeInTheDocument();
     });
 
     it('has confirm password type for password input ', () => {
-      render(SignUpPage);
+      renderSignUpPage();
       const input = screen.getByLabelText('Confirm Password');
       expect(input.type).toBe('password');
     });
 
     it('Has submit button', () => {
-      render(SignUpPage);
+      renderSignUpPage();
       const button = screen.queryByRole('button', { name: 'Submit' });
 
       expect(button).toBeInTheDocument();
     });
 
     it('Submit button is disabled', () => {
-      render(SignUpPage);
+      renderSignUpPage();
       const button = screen.queryByRole('button', { name: 'Submit' });
 
       expect(button).toBeDisabled();
@@ -100,7 +105,7 @@ describe('SignUp page', () => {
     }
 
     async function fillTheForm() {
-      render(SignUpPage);
+      renderSignUpPage();
 
       const password = screen.queryByPlaceholderText('Password');
       const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
@@ -121,7 +126,7 @@ describe('SignUp page', () => {
     beforeEach(() => server.resetHandlers());
 
     test('submit button is enable when password and confirm password are same', async () => {
-      render(SignUpPage);
+      renderSignUpPage();
       const password = screen.queryByPlaceholderText('Password');
       const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
       const button = screen.queryByRole('button', { name: 'Submit' });
@@ -309,7 +314,7 @@ describe('SignUp page', () => {
           return res(ctx.status(400));
         }),
       );
-      render(SignUpPage);
+      renderSignUpPage();
       const password = screen.queryByPlaceholderText('Password');
       const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
 
@@ -322,7 +327,7 @@ describe('SignUp page', () => {
       expect(text).toBeInTheDocument();
     });
 
-    fit.each`
+    it.each`
       field         | message                      | label
       ${'username'} | ${'Username cannot be null'} | ${'Username'}
       ${'password'} | ${'Password cannot be null'} | ${'Password'}

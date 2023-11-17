@@ -44,28 +44,28 @@ async function submitForm() {
   <div class="row justify-content-center">
     <form v-if="!success" class="card px-0 mt-5 col-md-4" data-testid="signup-form">
       <div class="card-header">
-        <h1 class="text-center">SignUp page</h1>
+        <h1 class="text-center">{{ $t('signUp') }}</h1>
       </div>
 
       <div class="card-body">
         <Input
           id="username"
           v-model="username"
-          label="Username"
+          :label="$t('username')"
           :error="errors.username"
           @update:model-value="errors.username = ''"
         />
         <Input
           id="email"
           v-model="email"
-          label="E-mail"
+          :label="$t('email')"
           :error="errors.email"
           @update:model-value="errors.email = ''"
         />
         <Input
           id="password"
           v-model="password"
-          label="Password"
+          :label="$t('password')"
           :error="errors.password"
           type="password"
           @update:model-value="errors.password = ''"
@@ -73,7 +73,7 @@ async function submitForm() {
         <Input
           id="confirm-password"
           v-model="confirmPassword"
-          label="Confirm Password"
+          :label="$t('confirmPassword')"
           :error="passwordMismatch ? 'Password mismatch' : ''"
           type="password"
         />
