@@ -1,159 +1,178 @@
-import { it, expect, describe, test } from '@jest/globals';
-import 'core-js';
-import '@testing-library/jest-dom';
-import { render, screen, waitFor, cleanup } from '@testing-library/vue';
+import { expect, it, test } from 'vitest';
+import { createI18n } from 'vue-i18n';
+import { flushPromises, mount } from '@vue/test-utils';
 import SignUpPage from './SignUp.vue';
 import Language from '../components/Language.vue';
-import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
-import { rest } from 'msw';
-import i18n from '../../locales/i18n';
+import { HttpResponse, http } from 'msw';
 import en from '../../locales/en.json';
 import fa from '../../locales/fa.json';
 
 describe('SignUp page', () => {
-  const renderSignUpPage = () => {
-    render(SignUpPage, { global: { plugins: [i18n] } });
-  };
+  // initialize signup page wrapper
+  const server = setupServer();
+  let wrapper = renderSignUpPage();
+
+  // Start server before all tests
+  beforeAll(() => server.listen());
+
+  //  Close server after all tests
+  afterAll(() => server.close());
+
+  // Mount signup wrapper
+  beforeEach(() => {
+    // Reset handlers before each test `important for test isolation`
+    server.resetHandlers();
+    wrapper = renderSignUpPage();
+  });
+
+  afterEach(() => wrapper.unmount());
+
+  function renderSignUpPage() {
+    const ComplexComponent = {
+      components: { SignUpPage, Language },
+      template: `
+      <SignUpPage />
+      <Language />`,
+    };
+
+    // creates new instance of i18n
+    const i18n = createI18n({ locale: 'en', messages: { en, fa } });
+
+    const wrapper = mount(ComplexComponent, { global: { plugins: [i18n] } });
+    return wrapper;
+  }
 
   async function fillTheForm() {
-    renderSignUpPage();
+    const email = wrapper.find('[placeholder="E-mail"]');
+    const username = wrapper.find('[placeholder="Username"]');
+    const password = wrapper.find('[placeholder="Password"]');
+    const confirmPassword = wrapper.find('[placeholder="Confirm Password"]');
 
-    const password = screen.queryByPlaceholderText('Password');
-    const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
-    const username = screen.queryByPlaceholderText('Username');
-    const email = screen.queryByPlaceholderText('E-mail');
-
-    await userEvent.type(email, 'user1@mail.com');
-    await userEvent.type(username, 'user1');
     const userPass = '123Zasdsd2@';
-    await userEvent.type(password, userPass);
-    await userEvent.type(confirmPassword, userPass);
+
+    await username.setValue('user1');
+    await password.setValue(userPass);
+    await email.setValue('user1@mail.com');
+    await confirmPassword.setValue(userPass);
   }
+
   async function clickSubmit() {
-    const button = screen.queryByRole('button', { name: 'Submit' });
-    await userEvent.click(button);
+    const button = wrapper.find('button');
+    await button.trigger('click');
   }
-
-  const server = setupServer();
-
-  beforeAll(() => server.listen());
-  afterAll(() => server.close());
-  beforeEach(() => {
-    cleanup();
-    server.resetHandlers();
-  });
 
   describe('Layout', () => {
     it('has SighUp header', () => {
-      renderSignUpPage();
-      const header = screen.queryByRole('heading', { name: 'SignUp page' });
+      const header = wrapper.find('h1');
 
-      expect(header).not.toBeNull();
+      expect(header.exists()).toBe(true);
     });
 
     it('has username input', () => {
-      renderSignUpPage();
-
-      const input = screen.queryByPlaceholderText('Username');
-      expect(input).toBeInTheDocument();
+      const input = wrapper.find('[placeholder="Username"]');
+      expect(input.exists()).toBe(true);
     });
 
     it('has username input label', () => {
-      renderSignUpPage();
-
-      const input = screen.getByLabelText('Username');
-      expect(input).toBeInTheDocument();
+      const input = wrapper.find('label[for="username"]');
+      expect(input.text()).toEqual('Username');
     });
 
     it('has email input', () => {
-      renderSignUpPage();
-      const input = screen.queryByPlaceholderText('E-mail');
-      expect(input).toBeInTheDocument();
+      const input = wrapper.find('[placeholder="E-mail"]');
+      expect(input.exists()).toBe(true);
     });
 
     it('has email input label', () => {
-      renderSignUpPage();
-      const input = screen.getByLabelText('E-mail');
-      expect(input).toBeInTheDocument();
+      const input = wrapper.find('label[for="email"]');
+      expect(input.text()).toEqual('E-mail');
     });
 
     it('has password input', () => {
-      renderSignUpPage();
-      const input = screen.queryByPlaceholderText('Password');
-      expect(input).toBeInTheDocument();
+      const input = wrapper.find('[placeholder="Password"]');
+      expect(input.exists()).toBe(true);
     });
 
     it('has password input label', () => {
-      renderSignUpPage();
-      const input = screen.getByLabelText('Password');
-      expect(input).toBeInTheDocument();
+      const input = wrapper.find('label[for="password"]');
+      expect(input.text()).toEqual('Password');
     });
 
     it('has password type for password input ', () => {
-      renderSignUpPage();
-      const input = screen.getByLabelText('Password');
-      expect(input.type).toBe('password');
+      const input = wrapper.find('input[type="password"][placeholder="Password"]');
+      expect(input.exists()).toBe(true);
     });
 
     it('has confirm password input', () => {
-      renderSignUpPage();
-      const input = screen.queryByPlaceholderText('Confirm Password');
-      expect(input).toBeInTheDocument();
+      const input = wrapper.find('[placeholder="Confirm Password"]');
+      expect(input.exists()).toBe(true);
     });
 
     it('has confirm password input label', () => {
-      renderSignUpPage();
-      const input = screen.getByLabelText('Confirm Password');
-      expect(input).toBeInTheDocument();
+      const input = wrapper.find('label[for="confirm-password"]');
+      expect(input.text()).toEqual('Confirm Password');
     });
 
     it('has confirm password type for password input ', () => {
-      renderSignUpPage();
-      const input = screen.getByLabelText('Confirm Password');
-      expect(input.type).toBe('password');
+      const input = wrapper.find('input[type="password"][placeholder="Confirm Password"]');
+      expect(input.exists()).toBe(true);
     });
 
     it('Has submit button', () => {
-      renderSignUpPage();
-      const button = screen.queryByRole('button', { name: 'Submit' });
+      const button = wrapper.find('button');
 
-      expect(button).toBeInTheDocument();
+      expect(button.text()).toEqual('Submit');
     });
 
     it('Submit button is disabled', () => {
-      renderSignUpPage();
-      const button = screen.queryByRole('button', { name: 'Submit' });
-
-      expect(button).toBeDisabled();
+      const button = wrapper.find('button[disabled]');
+      expect(button.exists()).toBe(true);
     });
   });
 
   describe('Interaction', () => {
     test('submit button is enable when password and confirm password are same', async () => {
-      renderSignUpPage();
-      const password = screen.queryByPlaceholderText('Password');
-      const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
-      const button = screen.queryByRole('button', { name: 'Submit' });
+      const password = wrapper.find('[placeholder="Password"]');
+      const confirmPassword = wrapper.find('[placeholder="Confirm Password"]');
 
       const userPass = '123Zasdsd2@';
-      await userEvent.type(password, userPass);
-      await userEvent.type(confirmPassword, userPass);
+      await password.setValue(userPass);
+      await confirmPassword.setValue(userPass);
 
-      expect(button).not.toBeDisabled();
+      await flushPromises();
+      const button = wrapper.find('button');
+      expect(button.attributes('disabled')).toBeUndefined();
+    });
+
+    test('submit button is disable when password and confirm password are same', async () => {
+      const password = wrapper.find('[placeholder="Password"]');
+      const confirmPassword = wrapper.find('[placeholder="Confirm Password"]');
+
+      const userPass1 = '123Zasdsd2@';
+      const userPass2 = '123Zasdsd2@aaa2';
+      await password.setValue(userPass1);
+      await confirmPassword.setValue(userPass2);
+
+      await flushPromises();
+      const button = wrapper.find('button[disabled]');
+
+      expect(button.exists()).toBe(true);
     });
 
     it('sends username, email and password to backend after clicking submit button', async () => {
       let reqBody;
+
       server.use(
-        rest.post('/api/1.0/users', (req, res, ctx) => {
-          reqBody = req.body;
-          return res(ctx.status(200));
+        http.post('/api/1.0/users', async ({ request }) => {
+          reqBody = await request.json();
+          return new HttpResponse(null, { status: 200 });
         }),
       );
 
       await fillTheForm();
       await clickSubmit();
+      await flushPromises();
 
       expect(reqBody).toEqual({
         email: 'user1@mail.com',
@@ -165,128 +184,116 @@ describe('SignUp page', () => {
     it('does not allow clicking to the button when there is an ongoing api call', async () => {
       let coutner = 0;
       server.use(
-        rest.post('/api/1.0/users', (req, res, ctx) => {
+        http.post('/api/1.0/users', () => {
           coutner = coutner + 1;
-          return res(ctx.status(200));
+          return new HttpResponse(null, { status: 200 });
         }),
       );
 
-      server.listen();
       await fillTheForm();
       await clickSubmit();
-
-      await server.close();
+      await flushPromises();
 
       expect(coutner).toBe(1);
     });
 
     it('displays spinner while api request is waiting', async () => {
       server.use(
-        rest.post('/api/1.0/users', (req, res, ctx) => {
-          return res(ctx.status(200));
+        http.post('/api/1.0/users', () => {
+          return new HttpResponse(null, { status: 200 });
         }),
       );
 
       await fillTheForm();
       await clickSubmit();
 
-      const spinner = screen.queryByRole('status');
+      const spinner = wrapper.find('[role="status"]');
 
-      expect(spinner).toBeInTheDocument();
+      expect(spinner.exists()).toBe(true);
     });
 
     it('does not displays spinner while ther is no api request is waiting', async () => {
       await fillTheForm();
-      const spinner = screen.queryByRole('status');
-      expect(spinner).not.toBeInTheDocument();
+      const spinner = wrapper.find('[role="status"]');
+
+      expect(spinner.exists()).toBe(false);
     });
 
     it('shows account activation information after successful signup', async () => {
       server.use(
-        rest.post('/api/1.0/users', (req, res, ctx) => {
-          return res(ctx.status(200));
+        http.post('/api/1.0/users', () => {
+          return new HttpResponse(null, { status: 200 });
         }),
       );
 
       await fillTheForm();
       await clickSubmit();
+      await flushPromises();
 
-      const activationMessage = await screen.findByText('Please check your email to activate your account');
+      const activationMessage = wrapper.find('[data-test="account-activation"]');
 
-      expect(activationMessage).toBeInTheDocument();
-    });
-
-    it('does not show account activation information after successful signup', async () => {
-      await fillTheForm();
-
-      const activationMessage = screen.queryByText('Please check your email to activate your account');
-
-      expect(activationMessage).not.toBeInTheDocument();
+      expect(activationMessage.exists()).toBe(true);
     });
 
     it('does not show account activation information after failing signup', async () => {
       server.use(
-        rest.post('/api/1.0/users', (req, res, ctx) => {
-          return res(ctx.status(400));
+        http.post('/api/1.0/users', () => {
+          return new HttpResponse(null, { status: 400 });
         }),
       );
 
       await fillTheForm();
       await clickSubmit();
+      await flushPromises();
 
-      await waitFor(() => {
-        const text = screen.queryByText('Please check your email to activate your account');
-        expect(text).not.toBeInTheDocument();
-      });
+      const activationMessage = wrapper.find('[data-test="account-activation"]');
+
+      expect(activationMessage.exists()).toBe(false);
     });
 
     it('hides signup form after successful signup', async () => {
       server.use(
-        rest.post('/api/1.0/users', (req, res, ctx) => {
-          return res(ctx.status(200));
+        http.post('/api/1.0/users', () => {
+          return new HttpResponse(null, { status: 200 });
         }),
       );
 
       await fillTheForm();
-      const button = screen.queryByRole('button', { name: 'Submit' });
-      // before clicking submit
-      const form = screen.queryByTestId('signup-form');
+      await clickSubmit();
+      await flushPromises();
 
-      await userEvent.click(button);
-      await waitFor(() => {
-        expect(form).not.toBeVisible();
-      });
+      const form = wrapper.find('form[data-test="signup-form"]');
+      expect(form.exists()).toBe(false);
     });
 
     it('hides spinner after error received', async () => {
       server.use(
-        rest.post('/api/1.0/users', (req, res, ctx) => {
-          return res(ctx.status(400));
+        http.post('/api/1.0/users', () => {
+          return new HttpResponse(null, { status: 400 });
         }),
       );
+
       await fillTheForm();
       await clickSubmit();
+      await flushPromises();
 
-      await waitFor(() => {
-        const spinner = screen.queryByRole('status');
-        expect(spinner).not.toBeInTheDocument();
-      });
+      const spinner = wrapper.find('[role="status"]');
+      expect(spinner.exists()).toBe(false);
     });
 
     it('enables the button after error', async () => {
       server.use(
-        rest.post('/api/1.0/users', (req, res, ctx) => {
-          return res(ctx.status(400));
+        http.post('/api/1.0/users', () => {
+          return new HttpResponse(null, { status: 400 });
         }),
       );
+
       await fillTheForm();
       await clickSubmit();
+      await flushPromises();
 
-      await waitFor(async () => {
-        const button = screen.queryByRole('button', { name: 'Submit' });
-
-        expect(button).toBeEnabled();
-      });
+      const button = wrapper.find('button');
+      expect(button.attributes('disabled')).toBeFalsy();
     });
 
     it.each`
@@ -294,35 +301,32 @@ describe('SignUp page', () => {
       ${'username'} | ${'Username cannot be null'}
       ${'password'} | ${'Password cannot be null'}
       ${'email'}    | ${'E-mail cannot be null'}
-    `('returns validation error message for $field field', async (params) => {
-      const { message, field } = params;
-
+    `('returns validation error message for $field field', async ({ message, field }) => {
       server.use(
-        rest.post('/api/1.0/users', (req, res, ctx) => {
-          return res(
-            ctx.status(400),
-            ctx.json({
-              validationErrors: { [field]: message },
-            }),
-          );
+        http.post('/api/1.0/users', () => {
+          return HttpResponse.json({ validationErrors: { [field]: message } }, { status: 400 });
         }),
       );
+
       await fillTheForm();
       await clickSubmit();
-      const text = await screen.findByText(message);
-      expect(text).toBeInTheDocument();
+      await flushPromises();
+
+      const span = wrapper.find(`span.invalid-feedback[data-test="${field}"]`);
+      expect(span.text()).toBe(message);
     });
 
     it('displays mismatch message for password input', async () => {
-      renderSignUpPage();
-      const password = screen.queryByPlaceholderText('Password');
-      const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
+      const password = wrapper.find('[placeholder="Password"]');
+      const confirmPassword = wrapper.find('[placeholder="Confirm Password"]');
 
-      await userEvent.type(password, '123Zasdsd2@');
-      await userEvent.type(confirmPassword, '3rdfSomeDifferentPass#');
+      await password.setValue('a password');
+      await confirmPassword.setValue('a different password');
 
-      const text = await screen.findByText(en.passwordMismatch);
-      expect(text).toBeInTheDocument();
+      await flushPromises();
+      const span = wrapper.find("span.invalid-feedback[data-test='confirm-password'");
+
+      expect(span.text()).toBe(en.passwordMismatch);
     });
 
     it.each`
@@ -332,68 +336,66 @@ describe('SignUp page', () => {
       ${'email'}    | ${'E-mail cannot be null'}   | ${'E-mail'}
     `('clears validation $field field error after input is updated', async ({ field, message, label }) => {
       server.use(
-        rest.post('/api/1.0/users', (req, res, ctx) => {
-          return res(ctx.status(400), ctx.json({ validationErrors: { [field]: message } }));
+        http.post('/api/1.0/users', () => {
+          return HttpResponse.json({ validationErrors: { [field]: message } }, { status: 400 });
         }),
       );
+
       await fillTheForm();
       await clickSubmit();
+      await flushPromises();
 
-      const input = screen.queryByPlaceholderText(label);
-      await userEvent.type(input, 'updated');
+      const input = wrapper.find(`[placeholder="${label}"]`);
+      await input.setValue('updated');
+      await flushPromises();
 
-      await waitFor(() => {
-        const errorMessage = screen.queryByText(message);
-        expect(errorMessage).not.toBeInTheDocument();
-      });
+      const span = wrapper.find(`span.invalid-feedback[data-test="${field}"]`);
+
+      expect(span.text()).not.toBe(message);
     });
   });
 
-  fdescribe('Internationalization', () => {
+  describe('Internationalization', () => {
     it('shows text in English by default', () => {
-      renderSignUpPage();
-
-      expect(screen.queryByRole('heading', { name: en.signUp })).toBeInTheDocument();
+      expect(wrapper.find('h1').text()).toBe(en.signUp);
     });
 
     it('shows text in FA after selecting FA language', async () => {
-      renderSignUpPage();
-      render(Language, { global: { plugins: [i18n] } });
+      expect(wrapper.find('h1').text()).toBe(en.signUp);
 
-      const Farsi = screen.queryByTitle('فارسی');
-      await userEvent.click(Farsi);
+      const Farsi = wrapper.find(".locale[title='فارسی'");
+      await Farsi.trigger('click');
 
-      expect(screen.queryByRole('heading', { name: fa.signUp })).toBeInTheDocument();
+      expect(wrapper.find('h1').text()).toBe(fa.signUp);
     });
 
     it('shows password validation text in FA ', async () => {
-      renderSignUpPage();
-      render(Language, { global: { plugins: [i18n] } });
+      const password = wrapper.find('[placeholder="Password"]');
+      const confirmPassword = wrapper.find('[placeholder="Confirm Password"]');
 
-      const password = screen.queryByPlaceholderText('Password');
-      const confirmPassword = screen.queryByPlaceholderText('Confirm Password');
+      await password.setValue('a password');
+      await confirmPassword.setValue('a different password');
 
-      await userEvent.type(password, '123Zasdsd2@');
-      await userEvent.type(confirmPassword, '3rdfSomeDifferentPass#');
+      const Farsi = wrapper.find(".locale[title='فارسی'");
+      await Farsi.trigger('click');
 
-      const Farsi = screen.queryByTitle('فارسی');
-      await userEvent.click(Farsi);
+      await flushPromises();
 
-      const text = await screen.findByText(fa.passwordMismatch);
-      expect(text).toBeInTheDocument();
+      const span = wrapper.find("span.invalid-feedback[data-test='confirm-password'");
+
+      expect(span.text()).toBe(fa.passwordMismatch);
     });
 
     it('shows text in EN after selecting EN language', async () => {
-      render(SignUpPage, { global: { plugins: [i18n] } });
-      render(Language, { global: { plugins: [i18n] } });
+      const Farsi = wrapper.find(".locale[title='فارسی'");
+      await Farsi.trigger('click');
 
-      const Farsi = screen.queryByTitle('فارسی');
-      await userEvent.click(Farsi);
+      const English = wrapper.find(".locale[title='English'");
+      await English.trigger('click');
 
-      const English = screen.queryByTitle('English');
-      await userEvent.click(English);
+      await flushPromises();
 
-      expect(screen.queryByRole('heading', { name: en.signUp })).toBeInTheDocument();
+      expect(wrapper.find('h1').text()).toBe(en.signUp);
     });
   });
 });

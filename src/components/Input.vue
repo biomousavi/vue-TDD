@@ -27,6 +27,6 @@ defineProps({
       :type="type"
       @input="$emit('update:modelValue', $event.target.value)"
     />
-    <span class="invalid-feedback">{{ error }}</span>
+    <span :data-test="id" class="invalid-feedback">{{ error }}</span>
   </div>
 </template>

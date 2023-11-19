@@ -42,7 +42,7 @@ async function submitForm() {
 
 <template>
   <div class="row justify-content-center">
-    <form v-if="!success" class="card px-0 mt-5 col-md-4" data-testid="signup-form">
+    <form v-if="!success" class="card px-0 mt-5 col-md-4" data-test="signup-form">
       <div class="card-header">
         <h1 class="text-center">{{ $t('signUp') }}</h1>
       </div>
@@ -79,13 +79,15 @@ async function submitForm() {
         />
 
         <div class="text-center">
-          <button class="btn btn-primary mt-3" :disabled="buttonIsDisabled" @click.prevent="submitForm">
+          <button class="btn btn-primary mt-3" :disabled="buttonIsDisabled" @click.prevent="submitForm()">
             <span v-if="loading" class="spinner-border spinner-border-sm" role="status"></span>
             Submit
           </button>
         </div>
       </div>
     </form>
-    <div v-if="success" class="alert alert-success">Please check your email to activate your account</div>
+    <div v-if="success" class="alert alert-success" data-test="account-activation">
+      Please check your email to activate your account
+    </div>
   </div>
 </template>

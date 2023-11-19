@@ -1,12 +1,10 @@
-import { it, expect, describe } from '@jest/globals';
-import 'core-js';
-import '@testing-library/jest-dom';
-import { render } from '@testing-library/vue';
+import { expect } from 'vitest';
+import { mount } from '@vue/test-utils';
 import Input from './Input.vue';
 
 describe('Input', () => {
-  it('has is-invalid class when error is set', () => {
-    const { container } = render(Input, {
+  it('has is-invalid class when error is set', async () => {
+    const wrapper = mount(Input, {
       props: {
         id: 'username',
         label: 'Username',
@@ -14,23 +12,21 @@ describe('Input', () => {
       },
     });
 
-    const input = container.querySelector('input');
-
-    expect(input.classList).toContain('is-invalid');
+    const input = wrapper.get('input');
+    expect(input.classes('is-invalid')).toBe(true);
   });
 
   it('does not have is-invalid class when error is not set', () => {
-    const { container } = render(Input, {
+    const wrapper = mount(Input, {
       props: { id: 'username', label: 'Username' },
     });
 
-    const input = container.querySelector('input');
-
-    expect(input.classList).not.toContain('is-invalid');
+    const input = wrapper.get('input');
+    expect(input.classes('is-invalid')).toBe(false);
   });
 
-  it('has invalid feedback class for error message', () => {
-    const { container } = render(Input, {
+  it('has invalid-feedback class for error message', () => {
+    const wrapper = mount(Input, {
       props: {
         id: 'username',
         label: 'Username',
@@ -38,8 +34,7 @@ describe('Input', () => {
       },
     });
 
-    const errorSpan = container.querySelector('span');
-
-    expect(errorSpan.classList).toContain('invalid-feedback');
+    const span = wrapper.get('span');
+    expect(span.classes('invalid-feedback')).toBe(true);
   });
 });
