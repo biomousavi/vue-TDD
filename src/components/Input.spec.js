@@ -1,4 +1,4 @@
-import { expect } from 'vitest';
+import { expect, describe } from 'vitest';
 import { mount } from '@vue/test-utils';
 import Input from './Input.vue';
 
