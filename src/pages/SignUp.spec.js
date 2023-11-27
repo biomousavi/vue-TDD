@@ -1,5 +1,5 @@
 import { expect, it, test } from 'vitest';
-import { createI18n } from 'vue-i18n';
+import i18n from '../../locales/i18n';
 import { flushPromises, mount } from '@vue/test-utils';
 import SignUpPage from './SignUp.vue';
 import Language from '../components/Language.vue';
@@ -35,9 +35,6 @@ describe('SignUp page', () => {
       <SignUpPage />
       <Language />`,
     };
-
-    // creates new instance of i18n
-    const i18n = createI18n({ locale: 'en', messages: { en, fa } });
 
     const wrapper = mount(ComplexComponent, { global: { plugins: [i18n] } });
     return wrapper;
